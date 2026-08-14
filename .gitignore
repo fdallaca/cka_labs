@@ -1,0 +1,3 @@
+shared_folder/
+*.box
+.vagrant/
