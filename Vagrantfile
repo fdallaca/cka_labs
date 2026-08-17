@@ -18,6 +18,17 @@ Vagrant.configure("2") do |config|
     id_rsa_pub = ENV['ID_RSA_PUB'] || File.expand_path("~/.ssh/id_rsa.pub")
     id_rsa     = ENV['ID_RSA']     || File.expand_path("~/.ssh/id_rsa")
 
+    # ── Network lifecycle triggers ───────────────────────────────────────────
+    config.trigger.before :up do |trigger|
+        trigger.name = "Ensure cka-lab0 network exists"
+        trigger.run  = { path: "scripts/setup-networks.sh" }
+    end
+
+    config.trigger.after :destroy do |trigger|
+        trigger.name = "Clean up cka-lab0 network when all VMs are gone"
+        trigger.run  = { path: "scripts/teardown-networks.sh" }
+    end
+
     config.vm.provider :libvirt do |lv|
         lv.uri               = "qemu:///system"
         lv.storage_pool_name = ENV['LIBVIRT_STORAGE_POOL'] || "images"
@@ -51,7 +62,6 @@ Vagrant.configure("2") do |config|
         node.vm.provider :libvirt do |lv|
             lv.memory = 512
             lv.cpus   = 1
-            lv.machine_virtual_size = 10
         end
 
         node.vm.synced_folder "./shared_folder", "/vagrant",
@@ -80,7 +90,6 @@ Vagrant.configure("2") do |config|
         node.vm.provider :libvirt do |lv|
             lv.memory = 2048
             lv.cpus   = 1
-            lv.machine_virtual_size = 20
         end
 
         node.vm.synced_folder "./shared_folder", "/vagrant",
@@ -108,7 +117,6 @@ Vagrant.configure("2") do |config|
         node.vm.provider :libvirt do |lv|
             lv.memory = 2048
             lv.cpus   = 1
-            lv.machine_virtual_size = 20
         end
 
         node.vm.synced_folder "./shared_folder", "/vagrant",
@@ -136,7 +144,6 @@ Vagrant.configure("2") do |config|
         node.vm.provider :libvirt do |lv|
             lv.memory = 2048
             lv.cpus   = 1
-            lv.machine_virtual_size = 20
         end
 
         node.vm.synced_folder "./shared_folder", "/vagrant",

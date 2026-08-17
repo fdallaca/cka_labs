@@ -24,12 +24,12 @@ All four VMs run **Debian 12 (bookworm)** on a single isolated libvirt network (
 
 ## Lab Topology
 
-| VM       | Role                     | vCPU | RAM   | Disk | IP         | SSH port |
-|----------|--------------------------|------|-------|------|------------|----------|
-| jumpbox  | Administration host      | 1    | 512 MB| 10 GB| 10.0.1.10  | 2210     |
-| server   | Kubernetes control plane | 1    | 2 GB  | 20 GB| 10.0.1.20  | 2220     |
-| node-0   | Kubernetes worker        | 1    | 2 GB  | 20 GB| 10.0.1.21  | 2221     |
-| node-1   | Kubernetes worker        | 1    | 2 GB  | 20 GB| 10.0.1.22  | 2222     |
+| VM       | Role                     | vCPU | RAM    | Disk   | IP         | SSH port |
+|----------|--------------------------|------|--------|--------|------------|----------|
+| jumpbox  | Administration host      | 1    | 512 MB | 100 GB | 10.0.1.10  | 2210     |
+| server   | Kubernetes control plane | 1    | 2 GB   | 100 GB | 10.0.1.20  | 2220     |
+| node-0   | Kubernetes worker        | 1    | 2 GB   | 100 GB | 10.0.1.21  | 2221     |
+| node-1   | Kubernetes worker        | 1    | 2 GB   | 100 GB | 10.0.1.22  | 2222     |
 
 Network: `cka-lab0` — `10.0.1.0/24` — isolated (no NAT, no DHCP)
 
@@ -133,13 +133,10 @@ cd cka_labs
 # 2. Source environment variables
 source ./env.sh
 
-# 3. Create the libvirt network (run once)
-bash ./scripts/setup-networks.sh
-
-# 4. Create the shared folder used for file exchange between VMs
+# 3. Create the shared folder used for file exchange between VMs
 mkdir -p shared_folder
 
-# 5. Bring up all four VMs
+# 4. Bring up all four VMs (the cka-lab0 network is created automatically)
 vagrant up
 ```
 
@@ -195,15 +192,12 @@ vagrant ssh server -- cat /etc/os-release | grep PRETTY_NAME
 
 ## Tear Down
 
-Destroy all VMs and remove the libvirt network:
+Destroy all VMs (the `cka-lab0` network is removed automatically after the last VM is destroyed):
 
 ```bash
 source ./env.sh
 
 vagrant destroy -f
-
-virsh --connect qemu:///system net-destroy  cka-lab0 || true
-virsh --connect qemu:///system net-undefine cka-lab0 || true
 
 vagrant global-status --prune
 ```

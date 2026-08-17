@@ -8,6 +8,11 @@
 LIBVIRT_URI="${1:-${LIBVIRT_DEFAULT_URI:-qemu:///system}}"
 VIRSH="virsh --connect ${LIBVIRT_URI}"
 
+# Serialize concurrent runs (vagrant fires one trigger per VM in parallel)
+exec 9>/tmp/cka-lab0-setup.lock
+trap 'rm -f /tmp/cka-lab0-setup.lock' EXIT
+flock -x 9
+
 if [[ "${LIBVIRT_URI}" != "qemu:///system" ]]; then
   echo "ERROR: this lab supports only qemu:///system." >&2
   echo "Please set LIBVIRT_DEFAULT_URI=qemu:///system and retry." >&2
